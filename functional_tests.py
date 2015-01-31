@@ -12,6 +12,11 @@ class NewVisitorTest(unittest.TestCase):
     def tearDown(self):
         self.browser.quit()
 
+    def check_for_row_in_list_table(self, row_text):
+        table = self.browser.find_element_by_id('id_list_table')
+        rows = table.find_elements_by_tag_name('tr')
+        self.assertIn(row_text, [row.text for row in rows])
+
     def test_can_start_a_list_and_retrieve_it_later(self):
         # Wendy has heard about an online to-do list site. She goes to it's home page using her Web browser.
         self.browser.get('http://localhost:8000')
@@ -32,12 +37,10 @@ class NewVisitorTest(unittest.TestCase):
         time.sleep(1)
         # She hits enter and the page updates.
         inputbox.send_keys(Keys.ENTER)
-        time.sleep(1)
+        time.sleep(2)
         
         # Now the page lists "1: Buy peacock feathers"
-        table = self.browser.find_element_by_id('id_list_table')
-        rows = table.find_elements_by_tag_name('tr')
-        self.assertIn('1: Buy peacock feathers', [row.text for row in rows])
+        self.check_for_row_in_list_table('1: Buy peacock feathers')
 
         # There is still a text box inviting her to add another item.
         inputbox = self.browser.find_element_by_id('id_new_item')
@@ -51,13 +54,11 @@ class NewVisitorTest(unittest.TestCase):
         time.sleep(1)
         # She hits enter and the page updates again.
         inputbox.send_keys(Keys.ENTER)
-        time.sleep(1)
+        time.sleep(2)
         
         # Now the page lists both of her items.
-        table = self.browser.find_element_by_id('id_list_table')
-        rows = table.find_elements_by_tag_name('tr')
-        self.assertIn('1: Buy peacock feathers', [row.text for row in rows])
-        self.assertIn('2: Use peacock feathers to make a fly', [row.text for row in rows])
+        self.check_for_row_in_list_table('1: Buy peacock feathers')
+        self.check_for_row_in_list_table('2: Use peacock feathers to make a fly')
 
         # Wendy notices that the site has generated a unique URL for her list, with some explanatory text to that effect.
         # She visits that URL and sees that her list is still there.
