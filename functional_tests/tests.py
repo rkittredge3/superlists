@@ -1,9 +1,9 @@
+from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-import unittest
 import time
 
-class NewVisitorTest(unittest.TestCase):
+class NewVisitorTest(LiveServerTestCase):
 
     def setUp(self):
         self.browser = webdriver.Firefox()
@@ -18,8 +18,8 @@ class NewVisitorTest(unittest.TestCase):
         self.assertIn(row_text, [row.text for row in rows])
 
     def test_can_start_a_list_and_retrieve_it_later(self):
-        # Wendy has heard about an online to-do list site. She goes to it's home page using her Web browser.
-        self.browser.get('http://localhost:8000')
+        # Edith has heard about an online to-do list site. She goes to it's home page using her Web browser.
+        self.browser.get(self.live_server_url)
 
         # The home page title, and a heading, tells her she's looking at the To-Do list site.
         self.assertIn('To-Do', self.browser.title)
@@ -35,11 +35,13 @@ class NewVisitorTest(unittest.TestCase):
         # She types "Buy peacock feathers". (She likes to make fly-fishing lures.)
         inputbox.send_keys('Buy peacock feathers')
         time.sleep(1)
-        # She hits enter and the page updates.
+        # When she hits enter she is taken to a new URL.
         inputbox.send_keys(Keys.ENTER)
-        time.sleep(2)
+        edith_list_url = self.browser.current_url
+        self.assertRegex(edith_list_url, '/lists/.+')
+        time.sleep(1)
         
-        # Now the page lists "1: Buy peacock feathers"
+        # Now the browser page lists "1: Buy peacock feathers"
         self.check_for_row_in_list_table('1: Buy peacock feathers')
 
         # There is still a text box inviting her to add another item.
@@ -60,12 +62,29 @@ class NewVisitorTest(unittest.TestCase):
         self.check_for_row_in_list_table('1: Buy peacock feathers')
         self.check_for_row_in_list_table('2: Use peacock feathers to make a fly')
 
-        # Wendy notices that the site has generated a unique URL for her list, with some explanatory text to that effect.
-        # She visits that URL and sees that her list is still there.
+        # Now a new user, Francis, sits down at her browser. (We kill the existing browser session and start a new one).
+        self.browser.quit()
+        self.browser = webdriver.Firefox()
 
-        # She calls it a day.
+        # Francis visits the home page. There is no sign of Edith's list.
+        self.browser.get(self.live_server_url)
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn('peacock feathers', page_text)
+
+        # Francis enters his first item.
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox.send_keys('Buy milk')
+        inputbox.send_keys(Keys.ENTER)
+
+        # Francis gets his own unique URL
+        francis_list_url = self.browser.current_url
+        self.assertNotEqual(francis_list_url, edith_list_url)
+
+        # And his list has his item, but none of Edith's items.
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertIn('1: Buy milk', page_text)
+        self.assertNotIn('peacock feathers', page_text)
+        
         self.fail('Finish the test!')
 
-if __name__ == '__main__':
-    unittest.main()
         
