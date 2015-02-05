@@ -7,3 +7,5 @@
 "lists/*.pyc" 
 "superlists/__pycache__" 
 "superlists/*.pyc" 
+"*/*/*.pyc" 
+"*/__pycache__" 
