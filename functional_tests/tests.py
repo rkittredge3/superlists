@@ -56,7 +56,7 @@ class NewVisitorTest(LiveServerTestCase):
         time.sleep(1)
         # She hits enter and the page updates again.
         inputbox.send_keys(Keys.ENTER)
-        time.sleep(2)
+        time.sleep(1)
         
         # Now the page lists both of her items.
         self.check_for_row_in_list_table('1: Buy peacock feathers')
@@ -74,7 +74,9 @@ class NewVisitorTest(LiveServerTestCase):
         # Francis enters his first item.
         inputbox = self.browser.find_element_by_id('id_new_item')
         inputbox.send_keys('Buy milk')
+        time.sleep(1)
         inputbox.send_keys(Keys.ENTER)
+        time.sleep(1)
 
         # Francis gets his own unique URL
         francis_list_url = self.browser.current_url
@@ -85,6 +87,5 @@ class NewVisitorTest(LiveServerTestCase):
         self.assertIn('1: Buy milk', page_text)
         self.assertNotIn('peacock feathers', page_text)
         
-        self.fail('Finish the test!')
 
         
