@@ -34,12 +34,11 @@ class NewVisitorTest(LiveServerTestCase):
         )
         # She types "Buy peacock feathers". (She likes to make fly-fishing lures.)
         inputbox.send_keys('Buy peacock feathers')
-        time.sleep(1)
+
         # When she hits enter she is taken to a new URL.
         inputbox.send_keys(Keys.ENTER)
         edith_list_url = self.browser.current_url
         self.assertRegex(edith_list_url, '/lists/.+')
-        time.sleep(1)
         
         # Now the browser page lists "1: Buy peacock feathers"
         self.check_for_row_in_list_table('1: Buy peacock feathers')
@@ -53,10 +52,9 @@ class NewVisitorTest(LiveServerTestCase):
         
         # She types "Use peacock feathers to make a fly"
         inputbox.send_keys('Use peacock feathers to make a fly')
-        time.sleep(1)
+
         # She hits enter and the page updates again.
         inputbox.send_keys(Keys.ENTER)
-        time.sleep(1)
         
         # Now the page lists both of her items.
         self.check_for_row_in_list_table('1: Buy peacock feathers')
@@ -74,9 +72,7 @@ class NewVisitorTest(LiveServerTestCase):
         # Francis enters his first item.
         inputbox = self.browser.find_element_by_id('id_new_item')
         inputbox.send_keys('Buy milk')
-        time.sleep(1)
         inputbox.send_keys(Keys.ENTER)
-        time.sleep(1)
 
         # Francis gets his own unique URL
         francis_list_url = self.browser.current_url
@@ -87,5 +83,27 @@ class NewVisitorTest(LiveServerTestCase):
         self.assertIn('1: Buy milk', page_text)
         self.assertNotIn('peacock feathers', page_text)
         
+    def test_layout_and_styling(self):
 
-        
+        # Edith goes to the home page
+        self.browser.get(self.live_server_url)
+        window_width = 1024
+        window_height = 768
+        self.browser.set_window_size(window_width, window_height)
+
+        # She notices the input box is nicely centered
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        self.assertAlmostEqual(
+            inputbox.location['x'] +  ( inputbox.size['width'] / 2 ),
+            window_width / 2,
+            delta = 15
+        )
+
+        # She starts a new list and sees that the input is centered there, too
+        inputbox.send_keys('testing\n')
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        self.assertAlmostEqual(
+            inputbox.location['x'] + ( inputbox.size['width'] / 2 ),
+            window_width / 2,
+            delta = 15
+        )
