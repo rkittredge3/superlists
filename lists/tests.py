@@ -134,3 +134,28 @@ class NewItemTest(TestCase):
         )
         
         self.assertRedirects(response, '/lists/%d/' % (correct_list.id),)
+
+class ResetListsTest(TestCase):
+
+    def test_reset_redirects_to_home_page(self):
+        response = self.client.post('/lists/reset/')
+
+        self.assertRedirects(response, '/')
+
+    def test_reset_clears_all_existing_items_and_lists(self):
+        some_list = List.objects.create()
+        another_list = List.objects.create()
+        response1 = self.client.post(
+            '/lists/%d/add_item/' % (some_list.id,),
+            data = { 'item_text' : 'number one item on some list' }
+        )
+        response2 = self.client.post(
+            '/lists/%d/add_item/' % (another_list.id,),
+            data = { 'item_text' : 'top item on another list' }
+        )
+        self.client.post(
+            '/lists/reset/'
+        )
+        
+        self.assertEqual(Item.objects.count(), 0, 'Items have not been cleared following reset')
+        self.assertEqual(List.objects.count(), 0, 'Lists have not been cleared following reset')

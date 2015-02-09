@@ -19,3 +19,8 @@ def add_item(request, list_id):
     list_ = List.objects.get(id = list_id)
     new_item = Item.objects.create(list = list_, text = request.POST['item_text'])
     return redirect('/lists/%d/' % (list_.id,))
+
+def reset_lists(request):
+    Item.objects.filter().delete()
+    List.objects.filter().delete()
+    return redirect('/')
